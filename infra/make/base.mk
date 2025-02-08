@@ -20,7 +20,7 @@ else
 	SOPS_KMS_ARN = "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 endif
 
-.PHONY: fmt init list show plan apply destroy
+.PHONY: fmt init list show plan apply destroy import
 
 fmt:
 	terraform fmt
@@ -37,12 +37,12 @@ list:
 	export AWS_REGION=$(AWS_REGION) && \
 	terraform state list
 
-# e.g. make show AWS_RESOURCE=<resource_name>.<resource_type>
+# e.g. $ make show AWS_RESOURCE_TYPE=aws_route53_zone AWS_RESOURCE_NAME=web_front
 show:
 	@export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) && \
 	export AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) && \
 	export AWS_REGION=$(AWS_REGION) && \
-	terraform state show $(AWS_RESOURCE)
+	terraform state show $(AWS_RESOURCE_TYPE).$(AWS_RESOURCE_NAME)
 
 plan:
 	@export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) && \
@@ -62,6 +62,12 @@ destroy:
 	export AWS_REGION=$(AWS_REGION) && \
 	terraform destroy
 
+# e.g. make import AWS_RESOURCE_TYPE=aws_route53_zone AWS_RESOURCE_NAME=web_front AWS_RESOURCE_IDENTIFIER=Z12345678901234567890
+import:
+	@export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) && \
+	export AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) && \
+	export AWS_REGION=$(AWS_REGION) && \
+	terraform import $(AWS_RESOURCE_TYPE).$(AWS_RESOURCE_NAME) $(AWS_RESOURCE_IDENTIFIER)
 
 .PHONY: encrypt-secret decrypt-secret
 
