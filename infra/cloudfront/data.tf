@@ -14,6 +14,8 @@ data "terraform_remote_state" "acm" {
   }
 }
 
+# マネージドのキャッシュポリシーを利用できるように設定
+# Reference: https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html#managed-cache-caching-optimized
 data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
