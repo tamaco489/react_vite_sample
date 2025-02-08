@@ -1,5 +1,14 @@
-ENV := dev
+# =====================================================================================
+# general
+# =====================================================================================
+ENV      := dev
+VAR_FILE := ./tfvars/${ENV}.tfvars
+VAR_OPTS := -var-file "$(VAR_FILE)"
 
+
+# =====================================================================================
+# env variables and options
+# =====================================================================================
 ifeq ($(ENV),stg)
 	AWS_PROFILE           := ""
 	AWS_ACCESS_KEY_ID     := ""
@@ -20,6 +29,10 @@ else
 	SOPS_KMS_ARN          := "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 endif
 
+
+# =====================================================================================
+# terraform
+# =====================================================================================
 .PHONY: fmt init list show plan apply destroy import
 
 fmt:
@@ -48,13 +61,13 @@ plan:
 	@export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) && \
 	export AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) && \
 	export AWS_REGION=$(AWS_REGION) && \
-	terraform plan
+	terraform plan $(VAR_OPTS)
 
 apply:
 	@export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) && \
 	export AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) && \
 	export AWS_REGION=$(AWS_REGION) && \
-	terraform apply
+	terraform apply $(VAR_OPTS)
 
 destroy:
 	@export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) && \
@@ -69,12 +82,18 @@ import:
 	export AWS_REGION=$(AWS_REGION) && \
 	terraform import $(AWS_RESOURCE_TYPE).$(AWS_RESOURCE_NAME) $(AWS_RESOURCE_IDENTIFIER)
 
+
+# =====================================================================================
+# sops
+# =====================================================================================
 .PHONY: encrypt-secret decrypt-secret
 
 # e.g. make encrypt-secret ENV=dev CREDENTIAL_FILE_NAME=web_front
 encrypt-secret:
-	@AWS_PROFILE=$(AWS_PROFILE) AWS_DEFAULT_REGION=$(AWS_REGION) sops --kms $(SOPS_KMS_ARN) tfvars/$(ENV)_$(CREDENTIAL_FILE_NAME).yaml
+	@AWS_PROFILE=$(AWS_PROFILE) AWS_DEFAULT_REGION=$(AWS_REGION) \
+		sops --kms $(SOPS_KMS_ARN) tfvars/$(ENV)_$(CREDENTIAL_FILE_NAME).yaml
 
 # e.g. make decrypt-secret ENV=dev CREDENTIAL_FILE_NAME=web_front
 decrypt-secret:
-	@AWS_PROFILE=$(AWS_PROFILE) AWS_DEFAULT_REGION=$(AWS_REGION) sops --kms $(SOPS_KMS_ARN) -d tfvars/$(ENV)_$(CREDENTIAL_FILE_NAME).yaml
+	@AWS_PROFILE=$(AWS_PROFILE) AWS_DEFAULT_REGION=$(AWS_REGION) \
+		sops --kms $(SOPS_KMS_ARN) -d tfvars/$(ENV)_$(CREDENTIAL_FILE_NAME).yaml
