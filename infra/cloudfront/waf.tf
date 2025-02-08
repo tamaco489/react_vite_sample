@@ -1,3 +1,43 @@
+# AWS Managed Rules
+# NOTE: https://dev.classmethod.jp/articles/aws-wafv2-wcus-limit-increase/
+
+# TTL WCU: 1475
+
+# 1. Amazon IP レピュテーション リスト マネージド ルール グループ
+# AWSManagedRulesAmazonIpReputationList
+# WCU: 25
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-ip-rep.html#aws-managed-rule-groups-ip-rep-amazon
+
+# 2. 匿名 IP リスト管理ルール グループ
+# AWSManagedRulesAnonymousIpList
+# WCU: 50
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-ip-rep.html#aws-managed-rule-groups-ip-rep-anonymous
+
+# 3. コアルールセット (CRS) 管理ルールグループ
+# AWSManagedRulesCommonRuleSet
+# WCU: 700
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html#aws-managed-rule-groups-baseline-crs
+
+# 4. 既知の不正な入力を管理するルール グループ
+# AWSManagedRulesKnownBadInputsRuleSet
+# WCU: 200
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html#aws-managed-rule-groups-baseline-known-bad-inputs
+
+# 5. Linuxシステムに関連する既知の脆弱性や攻撃から保護
+# AWSManagedRulesLinuxRuleSet
+# WCU: 200
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-use-case.html#aws-managed-rule-groups-use-case-linux-os
+
+# 6. SQL データベース管理ルール グループ
+# AWSManagedRulesSQLiRuleSet
+# WCU: 200
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-use-case.html#aws-managed-rule-groups-use-case-sql-db
+
+# 7. 管理者保護管理ルールグループ
+# AWSManagedRulesAdminProtectionRuleSet
+# WCU: 100
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html#aws-managed-rule-groups-baseline-admin
+
 resource "aws_wafv2_web_acl" "web_front" {
   name  = "${local.fqn}-web-front"
   scope = "CLOUDFRONT"
@@ -7,6 +47,7 @@ resource "aws_wafv2_web_acl" "web_front" {
   }
 
   # WCU: 25
+  # 1. 不正なIPアドレス（例えばスパム、ボットなど）を持つリクエストをブロック。
   rule {
     name     = "AWS-AWSManagedRulesAmazonIpReputationList"
     priority = 0
@@ -30,6 +71,7 @@ resource "aws_wafv2_web_acl" "web_front" {
   }
 
   # WCU: 50
+  # 2. 匿名IPアドレス（例えばVPNやプロキシ）からのリクエストを処理。
   rule {
     name     = "AWS-AWSManagedRulesAnonymousIpList"
     priority = 1
@@ -61,6 +103,7 @@ resource "aws_wafv2_web_acl" "web_front" {
   }
 
   # WCU: 700
+  # 3. 一般的な攻撃（クロスサイトスクリプティングやSQLインジェクションなど）を検出し、対応。
   rule {
     name     = "AWS-AWSManagedRulesCommonRuleSet"
     priority = 2
@@ -127,6 +170,7 @@ resource "aws_wafv2_web_acl" "web_front" {
   }
 
   # WCU: 200
+  # 4. 特定の悪意のある入力や攻撃からアプリケーションを保護する。
   rule {
     name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
     priority = 3
@@ -150,6 +194,7 @@ resource "aws_wafv2_web_acl" "web_front" {
   }
 
   # WCU: 200
+  # 5. Linuxシステムに関連する既知の脆弱性や攻撃から保護
   rule {
     name     = "AWS-AWSManagedRulesLinuxRuleSet"
     priority = 4
@@ -173,6 +218,7 @@ resource "aws_wafv2_web_acl" "web_front" {
   }
 
   # WCU: 200
+  # 6. SQLインジェクションを防止。
   rule {
     name     = "AWS-AWSManagedRulesSQLiRuleSet"
     priority = 5
@@ -203,6 +249,7 @@ resource "aws_wafv2_web_acl" "web_front" {
   }
 
   # WCU: 100
+  # 7. 理者が使用するウェブアプリケーションの管理インターフェースやAPIなどに対する攻撃を防ぐ。
   rule {
     name     = "AWS-AWSManagedRulesAdminProtectionRuleSet"
     priority = 6
