@@ -1,23 +1,23 @@
 ENV := dev
 
 ifeq ($(ENV),stg)
-	AWS_PROFILE := ""
-	AWS_ACCESS_KEY_ID := STG_ACCESS_KEY_ID
-	AWS_SECRET_ACCESS_KEY := STG_SECRET_ACCESS_KEY
-	AWS_REGION := ap-northeast-1
-	SOPS_KMS_ARN = "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-else ifeq ($(ENV),prd)
-	AWS_PROFILE := ""
-	AWS_ACCESS_KEY_ID := PRD_ACCESS_KEY_ID
-	AWS_SECRET_ACCESS_KEY := PRD_SECRET_ACCESS_KEY
-	AWS_REGION := ap-northeast-1
-	SOPS_KMS_ARN = "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-else
-	AWS_PROFILE := ""
-	AWS_ACCESS_KEY_ID := ""
+	AWS_PROFILE           := ""
+	AWS_ACCESS_KEY_ID     := ""
 	AWS_SECRET_ACCESS_KEY := ""
-	AWS_REGION := ap-northeast-1
-	SOPS_KMS_ARN = "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+	AWS_REGION            := "ap-northeast-1"
+	SOPS_KMS_ARN          := "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+else ifeq ($(ENV),prd)
+	AWS_PROFILE           := ""
+	AWS_ACCESS_KEY_ID     := ""
+	AWS_SECRET_ACCESS_KEY := ""
+	AWS_REGION            := "ap-northeast-1"
+	SOPS_KMS_ARN          := "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+else
+	AWS_PROFILE           := ""
+	AWS_ACCESS_KEY_ID     := ""
+	AWS_SECRET_ACCESS_KEY := ""
+	AWS_REGION            := "ap-northeast-1"
+	SOPS_KMS_ARN          := "arn:aws:kms:ap-northeast-1:<account_id>:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 endif
 
 .PHONY: fmt init list show plan apply destroy import
