@@ -1,8 +1,20 @@
+# CloudFront の Origin Access Control (OAC) を設定
+# OAC: CloudFront -> S3 バケットにアクセスする際の認証を管理するために使用。このリソースにより CloudFront -> S3 バケットへのアクセスを制御する。
+#
+# Reference: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_control
 resource "aws_cloudfront_origin_access_control" "web_front" {
   name                              = "${var.env}-react-vite-sample-web-front"
   description                       = "origin access controll for ${var.env} web front"
+
+  # CloudFront のオリジンのタイプを `s3` に指定。つまり、アクセス制御が S3 バケットに対して設定されていることを意味する。
+  # CloudFront からのリクエストが S3 バケットへ向かう場合、この設定が適用される。※他にはlambda, mediapackagev2, mediastore の指定が可能。
   origin_access_control_origin_type = "s3"
+
+  # CloudFront がリクエストをオリジンに転送する際に、リクエストの署名の扱いを `always` に指定。
+  # always: CloudFront からのすべてのリクエストに対して署名を行う。※セキュリティレベルを高めるため、常に署名が必要となるように設定。
   signing_behavior                  = "always"
+
+  # 署名プロトコルを `sigv4` に指定。※現時点で `sigv4` 以外の署名プロトコルを指定することは不可能。
   signing_protocol                  = "sigv4"
 }
 
