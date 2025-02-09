@@ -1,0 +1,33 @@
+name: React Vite Sample CI
+on:
+  pull_request:
+    paths:
+      - ./frontend/demo/**
+      - ./frontend/.tool-versions
+      - .github/workflows/web-front-ci.yaml
+
+permissions:
+  id-token: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ./frontend/demo/package-lock.json
+      - uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          level: warning
+          reporter: github-pr-review
+          workdir: ./frontend/demo
+          fail_level: warning
+      - name: build
+        working-directory: ./frontend/demo
+        run: npm run build

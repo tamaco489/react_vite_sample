@@ -1,0 +1,100 @@
+name: React Vite Sample CD
+run-name: React Vite Sample CD for ${{ github.ref }}
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "web_front_v*"
+    branches:
+      - main
+      - feature/cicd
+    paths:
+      - ./frontend/demo/**
+      - ./frontend/.tool-versions
+      - .github/workflows/web-front-cd.yaml
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setup-env:
+    runs-on: ubuntu-24.04
+    outputs:
+      env: ${{ steps.setup-env.outputs.env }}
+    steps:
+    - name : setup env
+      id: setup-env
+      run: |
+        # set up env
+        if [[ "${GITHUB_REF}" == refs/tags/web_front_v* ]]; then
+          echo "env=prd" >> "$GITHUB_OUTPUT"
+        else
+          echo "env=dev" >> "$GITHUB_OUTPUT"
+        fi
+
+  deploy:
+    runs-on: ubuntu-24.04
+    needs:
+      - setup-env
+    defaults:
+      run:
+        working-directory: ./frontend/demo
+    environment: ${{ needs.setup-env.outputs.env }}
+    if: needs.setup-env.outputs.env == 'dev'
+    env:
+      APP_ENV: ${{ needs.setup-env.outputs.env }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/dev-react-vite-sample-github-actions-oidc-role
+          aws-region: ap-northeast-1
+
+      - name: configure env
+        run: |
+          cat <<EOF > .env
+          VITE_AUTH0_DOMAIN=${{ vars.VITE_AUTH0_DOMAIN }}
+          VITE_AUTH0_CLIENT_ID=${{ vars.VITE_AUTH0_CLIENT_ID }}
+          VITE_AUTH0_AUDIENCE=${{ vars.VITE_AUTH0_AUDIENCE }}
+          VITE_APP_API_URL=${{ vars.VITE_APP_API_URL }}
+          EOF
+        working-directory: ./frontend/demo
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ./frontend/demo/package-lock.json
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: build
+        working-directory: ./frontend/demo
+        run: npm run build
+
+      - name: deploy
+        working-directory: ./frontend/demo
+        run: aws s3 sync ./dist s3://${{ env.APP_ENV }}-react-vite-sample-web-front --delete
+
+      - name: Clear Cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ vars.WEBADMIN_CF_ID }} --paths "/*"
+
+      - name: Slack Notification (Deploy Success)
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.DEPLOY_SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: 'good'
+          SLACK_MESSAGE: "Env: ${{ env.APP_ENV }} \nMsg: react-vite-sampleのdeployに成功しました:rocket:"
+
+      - name: Slack Notification (Deploy Failed)
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.DEPLOY_SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: 'danger'
+          SLACK_MESSAGE: "Env: ${{ env.APP_ENV }} \nMsg: react-vite-sampleのdeployに失敗しました:cry:"
