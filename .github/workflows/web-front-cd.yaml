@@ -87,6 +87,7 @@ jobs:
         if: success()
         uses: rtCamp/action-slack-notify@v2
         env:
+          SLACK_WEBHOOK: ${{ secrets.DEPLOY_SLACK_WEBHOOK_URL }}
           SLACK_COLOR: 'good'
           SLACK_MESSAGE: "Env: ${{ env.APP_ENV }} \nMsg: react-vite-sampleのdeployに成功しました:rocket:"
 
@@ -94,5 +95,6 @@ jobs:
         if: failure()
         uses: rtCamp/action-slack-notify@v2
         env:
+          SLACK_WEBHOOK: ${{ secrets.DEPLOY_SLACK_WEBHOOK_URL }}
           SLACK_COLOR: 'danger'
           SLACK_MESSAGE: "Env: ${{ env.APP_ENV }} \nMsg: react-vite-sampleのdeployに失敗しました:cry:"
