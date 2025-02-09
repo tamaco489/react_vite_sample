@@ -1,10 +1,11 @@
 name: React Vite Sample CD
 run-name: React Vite Sample CD for ${{ github.ref }}
+
 on:
   workflow_dispatch:
   push:
     tags:
-        - "web_front_v*"
+      - "web_front_v*"
     branches:
       - main
       - feature/cicd
@@ -40,10 +41,10 @@ jobs:
     defaults:
       run:
         working-directory: ./frontend/demo
-    environment: ${{ needs../setup-env.outputs.env}}
+    environment: ${{ needs.setup-env.outputs.env }}
     if: needs.setup-env.outputs.env == 'dev'
     env:
-      APP_ENV: ${{ needs.setup-env.outputs.env}}
+      APP_ENV: ${{ needs.setup-env.outputs.env }}
     steps:
       - uses: actions/checkout@v4
 
