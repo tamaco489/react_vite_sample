@@ -1,8 +1,8 @@
 resource "aws_kms_key" "this" {
   description             = "KMS key for SOPS encryption"
-  enable_key_rotation     = true # キーローテーションを有効にする
-  rotation_period_in_days = 90   # キーのローテーション期間
-  deletion_window_in_days = 7    # 削除時の猶予期間
+  enable_key_rotation     = true
+  rotation_period_in_days = 90
+  deletion_window_in_days = 7
 }
 
 resource "aws_kms_alias" "this" {

@@ -15,10 +15,10 @@ resource "aws_s3_bucket" "web_front" {
 # S3 のパブリックアクセス制限
 resource "aws_s3_bucket_public_access_block" "web_front" {
   bucket                  = aws_s3_bucket.web_front.id
-  block_public_acls       = true # バケット内のオブジェクトがパブリックACLを持てないようにする
-  block_public_policy     = true # バケットのポリシーでパブリックアクセスを許可しない
-  ignore_public_acls      = true # 既存のパブリックACLを無視し、強制的に拒否
-  restrict_public_buckets = true # バケットポリシーでパブリックアクセスが許可されていても制限する
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 # Web Front S3 バケットに対してバケットポリシーを適用
